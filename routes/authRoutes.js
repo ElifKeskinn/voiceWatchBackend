@@ -13,7 +13,7 @@ const authController = require('../controllers/authController');
  * @swagger
  * /api/auth/signup:
  *   post:
- *     summary: Register a new user
+ *     summary: Yeni bir kullanıcı kaydeder
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -26,8 +26,10 @@ const authController = require('../controllers/authController');
  *               - surname
  *               - tcKimlik
  *               - age
+ *               - phoneNumber
  *               - password
  *               - bloodGroup
+ *               - emergencyContacts
  *             properties:
  *               name:
  *                 type: string
@@ -37,23 +39,34 @@ const authController = require('../controllers/authController');
  *                 type: string
  *               age:
  *                 type: integer
+ *               phoneNumber:
+ *                 type: string
  *               password:
  *                 type: string
  *               bloodGroup:
  *                 type: string
  *               emergencyContacts:
  *                 type: array
+ *                 minItems: 2 # En az iki eleman olması gerektiğini belirtir
  *                 items:
- *                   type: string
+ *                   type: object
+ *                   required:
+ *                     - contactNumber
+ *                     - contactInfo
+ *                   properties:
+ *                     contactNumber:
+ *                       type: string
+ *                     contactInfo:
+ *                       type: string
  *               profilePic:
  *                 type: string
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: Kullanıcı başarıyla oluşturuldu.
  *       400:
- *         description: TC Kimlik Numarası already exists
+ *         description: TC Kimlik Numarası zaten mevcut veya geçersiz istek verisi.
  *       500:
- *         description: Server Error
+ *         description: Sunucu Hatası.
  */
 router.post('/signup', authController.signup);
 
@@ -61,7 +74,7 @@ router.post('/signup', authController.signup);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Login user
+ *     summary: Kullanıcı girişi yapar
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -79,11 +92,11 @@ router.post('/signup', authController.signup);
  *                 type: string
  *     responses:
  *       200:
- *         description: JWT Token
+ *         description: JWT Token.
  *       400:
- *         description: Invalid TC Kimlik Numarası or password
+ *         description: Geçersiz TC Kimlik Numarası veya şifre.
  *       500:
- *         description: Server Error
+ *         description: Sunucu Hatası.
  */
 router.post('/login', authController.login);
 

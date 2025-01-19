@@ -18,19 +18,24 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *       type: object
  *       required:
  *         - contactNumber
+ *         - contactInfo
  *       properties:
  *         id:
  *           type: integer
- *           description: Kontaktun benzersiz kimliği
+ *           description: Kontakun benzersiz kimliği
  *         contactNumber:
  *           type: string
- *           description: Acil durum kontakt numarası
+ *           description: Acil durum kontak numarası
+ *         contactInfo:
+ *           type: string
+ *           description: Acil durum kontak bilgisi
  *         userId:
  *           type: integer
  *           description: Kullanıcının kimliği
  *       example:
  *         id: 1
  *         contactNumber: "05001234567"
+ *         contactInfo: "Anne"
  *         userId: 1
  */
 
@@ -54,7 +59,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *       401:
  *         description: Yetkisiz erişim
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.get('/', authMiddleware, contactController.getContacts);
 
@@ -74,12 +79,17 @@ router.get('/', authMiddleware, contactController.getContacts);
  *             type: object
  *             required:
  *               - contactNumber
+ *               - contactInfo
  *             properties:
  *               contactNumber:
  *                 type: string
  *                 description: Eklenen yeni kontak numarası
+ *               contactInfo:
+ *                 type: string
+ *                 description: Eklenen kontak bilgisi
  *             example:
  *               contactNumber: "05007654321"
+ *               contactInfo: "Baba"
  *     responses:
  *       201:
  *         description: Kontakt başarıyla eklendi
@@ -92,7 +102,7 @@ router.get('/', authMiddleware, contactController.getContacts);
  *       401:
  *         description: Yetkisiz erişim
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.post('/', authMiddleware, contactController.addContact);
 
@@ -121,8 +131,12 @@ router.post('/', authMiddleware, contactController.addContact);
  *               contactNumber:
  *                 type: string
  *                 description: Güncellenmiş kontak numarası
+ *               contactInfo:
+ *                 type: string
+ *                 description: Güncellenmiş kontak bilgisi
  *             example:
  *               contactNumber: "05009876543"
+ *               contactInfo: "Dede"
  *     responses:
  *       200:
  *         description: Kontakt başarıyla güncellendi
@@ -137,7 +151,7 @@ router.post('/', authMiddleware, contactController.addContact);
  *       404:
  *         description: Kontakt bulunamadı
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.patch('/:id', authMiddleware, contactController.updateContact);
 
@@ -164,7 +178,7 @@ router.patch('/:id', authMiddleware, contactController.updateContact);
  *       404:
  *         description: Kontakt bulunamadı
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.delete('/:id', authMiddleware, contactController.deleteContact);
 

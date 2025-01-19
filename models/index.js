@@ -22,7 +22,7 @@ db.sequelize = sequelize;
 db.User = require('./user')(sequelize, Sequelize);
 db.Contact = require('./contact')(sequelize, Sequelize);
 
-// İlişkileri tanımla (güncellenebilir alanlar)
+// İlişkileri tanımla
 db.User.hasMany(db.Contact, { as: 'emergencyContacts', foreignKey: 'userId' });
 db.Contact.belongsTo(db.User, { foreignKey: 'userId' });
 

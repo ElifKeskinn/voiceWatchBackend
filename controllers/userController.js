@@ -3,11 +3,12 @@ const bcrypt = require('bcryptjs');
 
 exports.getMe = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user.toJSON();
+    delete user.password; // Şifreyi sil
     res.json(user);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Sunucu Hatası' });
   }
 };
 
@@ -24,10 +25,10 @@ exports.updateProfile = async (req, res) => {
       profilePic: profilePic || user.profilePic
     });
 
-    res.json({ message: 'Profile updated successfully' });
+    res.json({ message: 'Profil başarıyla güncellendi.' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Sunucu Hatası' });
   }
 };
 
@@ -37,15 +38,17 @@ exports.changePassword = async (req, res) => {
   try {
     const user = req.user;
 
+    // Eski şifrenin doğruluğunu kontrol et
     const isMatch = await user.validPassword(oldPassword);
-    if (!isMatch) return res.status(400).json({ message: 'Old password is incorrect' });
+    if (!isMatch) return res.status(400).json({ message: 'Eski şifre yanlış.' });
 
+    // Yeni şifreyi ata ve kaydet
     user.password = newPassword;
     await user.save();
 
-    res.json({ message: 'Password changed successfully' });
+    res.json({ message: 'Şifre başarıyla değiştirildi.' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Sunucu Hatası' });
   }
 };

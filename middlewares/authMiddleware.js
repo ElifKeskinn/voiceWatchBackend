@@ -13,17 +13,17 @@ const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await db.User.findByPk(decoded.id, {
-      attributes: { exclude: ['password'] },
+     
       include: [{ model: db.Contact, as: 'emergencyContacts' }]
     });
 
-    if (!user) return res.status(401).json({ message: 'User not found' });
+    if (!user) return res.status(401).json({ message: 'Kullanıcı bulunamadı.' });
 
     req.user = user; // Kullanıcı bilgisi req nesnesine ekleniyor
     next();
   } catch (err) {
     console.error(err);
-    res.status(403).json({ message: 'Invalid token' });
+    res.status(403).json({ message: 'Geçersiz token.' });
   }
 };
 
