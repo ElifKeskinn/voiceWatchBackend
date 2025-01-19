@@ -21,6 +21,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *         - surname
  *         - tcKimlik
  *         - age
+ *         - phoneNumber
  *         - bloodGroup
  *       properties:
  *         id:
@@ -38,6 +39,9 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *         age:
  *           type: integer
  *           description: Kullanıcının yaşı
+ *         phoneNumber:
+ *           type: string
+ *           description: Kullanıcının telefon numarası
  *         bloodGroup:
  *           type: string
  *           description: Kan grubu
@@ -53,6 +57,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *         surname: "Keskin"
  *         tcKimlik: "12345678901"
  *         age: 25
+ *         phoneNumber: "05001234567"
  *         bloodGroup: "A+"
  *         profilePic: "http://example.com/profile.jpg"
  *         sensitivity: 5
@@ -76,7 +81,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *       401:
  *         description: Yetkisiz erişim
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.get('/me', authMiddleware, userController.getMe);
 
@@ -126,13 +131,13 @@ router.get('/me', authMiddleware, userController.getMe);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Profile updated successfully"
+ *                   example: "Profil başarıyla güncellendi."
  *       400:
  *         description: Geçersiz istek verisi
  *       401:
  *         description: Yetkisiz erişim
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.patch('/me', authMiddleware, userController.updateProfile);
 
@@ -173,13 +178,13 @@ router.patch('/me', authMiddleware, userController.updateProfile);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Password changed successfully"
+ *                   example: "Şifre başarıyla değiştirildi."
  *       400:
  *         description: Eski şifre yanlış veya geçersiz istek verisi
  *       401:
  *         description: Yetkisiz erişim
  *       500:
- *         description: Sunucu hatası
+ *         description: Sunucu Hatası
  */
 router.post('/change-password', authMiddleware, userController.changePassword);
 

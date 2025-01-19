@@ -54,7 +54,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/contacts', contactRoutes);
 
-// test endpointi http://localhost:5000/ ile test edilebilir swagger ekranı için http://localhost:5000/api-docs/
+// // test endpointi http://localhost:5000/ ile test edilebilir swagger ekranı için http://localhost:5000/api-docs/
 app.get('/', (req, res) => {
   res.send('VoiceWatch Backend API is running.');
 });
@@ -65,7 +65,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error' });
 });
 
-// Veritabanı bağlantısını test ve senkronize
+// Veritabanı bağlantısını test et ve senkronize et
 db.sequelize.authenticate()
   .then(() => {
     console.log('Database connected...');
