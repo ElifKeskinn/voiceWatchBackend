@@ -52,3 +52,31 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: 'Sunucu Hatası' });
   }
 };
+
+// Yeni Hesap Silme Fonksiyonu
+exports.deleteAccount = async (req, res) => {
+  const { password } = req.body;
+
+  // Şifre alanının mevcut olup olmadığını kontrol et
+  if (!password) {
+    return res.status(400).json({ message: 'Şifre gerekli.' });
+  }
+
+  try {
+    const user = req.user;
+
+    // Şifrenin doğruluğunu kontrol et
+    const isMatch = await user.validPassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Şifre yanlış.' });
+    }
+
+    // Soft delete işlemi: isDeleted'ı true yap
+    await user.update({ isDeleted: true });
+
+    res.json({ message: 'Hesabınız başarıyla silindi.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Sunucu Hatası.' });
+  }
+};

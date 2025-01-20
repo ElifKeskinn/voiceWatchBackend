@@ -12,8 +12,11 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await db.User.findByPk(decoded.id, {
-     
+    const user = await db.User.findOne({
+      where: {
+        id: decoded.id,
+        isDeleted: false 
+      },
       include: [{ model: db.Contact, as: 'emergencyContacts' }]
     });
 

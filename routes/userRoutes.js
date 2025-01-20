@@ -188,4 +188,47 @@ router.patch('/me', authMiddleware, userController.updateProfile);
  */
 router.post('/change-password', authMiddleware, userController.changePassword);
 
+
+/**
+ * @swagger
+ * /api/user/delete-account:
+ *   delete:
+ *     summary: Authenticated kullanıcının hesabını siler (Soft Delete)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: Hesabı silmek için şifre
+ *             example:
+ *               password: "currentPassword123"
+ *     responses:
+ *       200:
+ *         description: Hesap başarıyla silindi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Hesabınız başarıyla silindi."
+ *       400:
+ *         description: Şifre yanlış veya geçersiz istek verisi
+ *       401:
+ *         description: Yetkisiz erişim
+ *       500:
+ *         description: Sunucu Hatası
+ */
+router.delete('/delete-account', authMiddleware, userController.deleteAccount);
+
 module.exports = router;
