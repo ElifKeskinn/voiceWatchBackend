@@ -43,6 +43,11 @@ module.exports = (sequelize, DataTypes) => {
     sensitivity: {
       type: DataTypes.INTEGER,
       defaultValue: 5
+    },
+    isDeleted: { 
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
   }, {
     tableName: 'Users',

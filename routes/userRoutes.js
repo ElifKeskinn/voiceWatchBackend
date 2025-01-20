@@ -188,4 +188,129 @@ router.patch('/me', authMiddleware, userController.updateProfile);
  */
 router.post('/change-password', authMiddleware, userController.changePassword);
 
+
+/**
+ * @swagger
+ * /api/user/delete-account:
+ *   delete:
+ *     summary: Authenticated kullanıcının hesabını siler (Soft Delete)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: Hesabı silmek için şifre
+ *             example:
+ *               password: "currentPassword123"
+ *     responses:
+ *       200:
+ *         description: Hesap başarıyla silindi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Hesabınız başarıyla silindi."
+ *       400:
+ *         description: Şifre yanlış veya geçersiz istek verisi
+ *       401:
+ *         description: Yetkisiz erişim
+ *       500:
+ *         description: Sunucu Hatası
+ */
+router.delete('/delete-account', authMiddleware, userController.deleteAccount);
+
+
+/**
+ * @swagger
+ * /api/user/forgot-password:
+ *   post:
+ *     summary: Kullanıcının şifresini sıfırlamak için reset kodu gönderir
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phoneNumber
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Kullanıcının telefon numarası
+ *             example:
+ *               phoneNumber: "05345701578"
+ *     responses:
+ *       200:
+ *         description: Şifre sıfırlama kodu telefonunuza gönderildi.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Şifre sıfırlama kodu telefonunuza gönderildi."
+ *       400:
+ *         description: Telefon numarası gerekli veya kullanıcı bulunamadı.
+ *       500:
+ *         description: Sunucu Hatası.
+ */
+router.post('/forgot-password', userController.forgotPassword);
+
+/**
+ * @swagger
+ * /api/user/reset-password:
+ *   post:
+ *     summary: Reset kodunu doğrular ve yeni şifreyi ayarlar
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - resetCode
+ *               - newPassword
+ *             properties:
+ *               resetCode:
+ *                 type: string
+ *                 description: Şifre sıfırlama kodu
+ *               newPassword:
+ *                 type: string
+ *                 description: Yeni şifre
+ *             example:
+ *               resetCode: "123456"
+ *               newPassword: "yeniSifre123"
+ *     responses:
+ *       200:
+ *         description: Şifreniz başarıyla güncellendi.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Şifreniz başarıyla güncellendi."
+ *       400:
+ *         description: Reset kodu yanlış veya süresi dolmuş.
+ *       500:
+ *         description: Sunucu Hatası.
+ */
+router.post('/reset-password', userController.resetPassword);
+
 module.exports = router;

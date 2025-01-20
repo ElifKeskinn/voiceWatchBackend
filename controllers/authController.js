@@ -25,7 +25,7 @@ exports.signup = async (req, res) => {
       surname,
       tcKimlik,
       age,
-      phoneNumber, // Yeni alan
+      phoneNumber, 
       password,
       bloodGroup,
       profilePic
