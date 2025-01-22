@@ -1,6 +1,7 @@
+// middlewares/authMiddleware.js
+
 const jwt = require('jsonwebtoken');
 const db = require('../models');
-require('dotenv').config();
 
 const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -15,7 +16,7 @@ const authMiddleware = async (req, res, next) => {
     const user = await db.User.findOne({
       where: {
         id: decoded.id,
-        isDeleted: false 
+        isDeleted: false
       },
       include: [{ model: db.Contact, as: 'emergencyContacts' }]
     });
@@ -25,7 +26,7 @@ const authMiddleware = async (req, res, next) => {
     req.user = user; // Kullanıcı bilgisi req nesnesine ekleniyor
     next();
   } catch (err) {
-    console.error(err);
+    console.error('Auth middleware error:', err);
     res.status(403).json({ message: 'Geçersiz token.' });
   }
 };

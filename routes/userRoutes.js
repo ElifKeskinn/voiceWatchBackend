@@ -313,4 +313,47 @@ router.post('/forgot-password', userController.forgotPassword);
  */
 router.post('/reset-password', userController.resetPassword);
 
+
+/**
+ * @swagger
+ * /api/user/update-device-token:
+ *   post:
+ *     summary: Kullanıcının device tokenini günceller
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - deviceToken
+ *             properties:
+ *               deviceToken:
+ *                 type: string
+ *                 description: Kullanıcının cihaz tokeni
+ *             example:
+ *               deviceToken: "abc123def456..."
+ *     responses:
+ *       200:
+ *         description: Device token başarıyla güncellendi.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Device token başarıyla güncellendi."
+ *       400:
+ *         description: deviceToken gerekli.
+ *       401:
+ *         description: Yetkisiz erişim
+ *       500:
+ *         description: Sunucu Hatası
+ */
+router.post('/update-device-token', authMiddleware, userController.updateDeviceToken);
+
 module.exports = router;
