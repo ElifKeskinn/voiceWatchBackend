@@ -17,8 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     tcKimlik: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     age: {
       type: DataTypes.INTEGER,
@@ -48,15 +47,33 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
+    },
+    deviceToken: { 
+      type: DataTypes.STRING(255),
+      allowNull: true
     }
   }, {
     tableName: 'Users',
     hooks: {
       beforeCreate: async (user) => {
+        const existingUser = await sequelize.models.User.findOne({
+          where: { tcKimlik: user.tcKimlik, isDeleted: false }
+        });
+        if (existingUser) {
+          throw new Error('Bu TC Kimlik Numarası ile aktif bir kullanıcı zaten mevcut.');
+        }
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
       },
       beforeUpdate: async (user) => {
+        if (user.changed('tcKimlik')) {
+          const existingUser = await sequelize.models.User.findOne({
+            where: { tcKimlik: user.tcKimlik, isDeleted: false, id: { [sequelize.Op.ne]: user.id } }
+          });
+          if (existingUser) {
+            throw new Error('Bu TC Kimlik Numarası ile aktif bir kullanıcı zaten mevcut.');
+          }
+        }
         if (user.changed('password')) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
@@ -67,6 +84,12 @@ module.exports = (sequelize, DataTypes) => {
 
   User.prototype.validPassword = async function(password) {
     return await bcrypt.compare(password, this.password);
+  };
+  
+  User.associate = (models) => {
+    User.hasMany(models.Contact, { as: 'emergencyContacts', foreignKey: 'userId', onDelete: 'NO ACTION' });
+    User.hasMany(models.PasswordReset, { as: 'passwordResets', foreignKey: 'userId', onDelete: 'NO ACTION' });
+    User.hasMany(models.Alert, { as: 'alerts', foreignKey: 'userId', onDelete: 'NO ACTION' });
   };
 
   return User;

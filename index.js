@@ -4,6 +4,7 @@ const db = require('./models'); // Sequelize modelleri
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const alertRoutes = require('./routes/alertRoutes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -53,6 +54,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/contacts', contactRoutes);
+app.use('/api/alert', alertRoutes);
 
 // // test endpointi http://localhost:5000/ ile test edilebilir swagger ekranı için http://localhost:5000/api-docs/
 app.get('/', (req, res) => {

@@ -77,12 +77,29 @@ exports.deleteAccount = async (req, res) => {
     // Soft delete işlemi: isDeleted'ı true yap
     await user.update({ isDeleted: true });
 
+    // İlgili tabloları da soft delete yap
+    await db.Alert.update(
+      { isDeleted: true },
+      { where: { userId: user.id } }
+    );
+
+    await db.Contact.update(
+      { isDeleted: true },
+      { where: { userId: user.id } }
+    );
+
+    await db.PasswordReset.update(
+      { isDeleted: true },
+      { where: { userId: user.id } }
+    );
+
     res.json({ message: 'Hesabınız başarıyla silindi.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Sunucu Hatası.' });
   }
 };
+
 /**
  * Şifre sıfırlama isteği gönderir ve SMS ile kod gönderir.
  */
@@ -178,6 +195,28 @@ exports.resetPassword = async (req, res) => {
     await passwordReset.destroy();
 
     res.json({ message: 'Şifreniz başarıyla güncellendi.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Sunucu Hatası' });
+  }
+};
+
+/**
+ * Device Token Güncelleme
+ */
+exports.updateDeviceToken = async (req, res) => {
+  const { deviceToken } = req.body;
+
+  if (!deviceToken) {
+    return res.status(400).json({ message: 'deviceToken gerekli.' });
+  }
+
+  try {
+    const user = req.user;
+    user.deviceToken = deviceToken;
+    await user.save();
+
+    res.json({ message: 'Device token başarıyla güncellendi.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Sunucu Hatası' });

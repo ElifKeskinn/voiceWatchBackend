@@ -18,47 +18,62 @@ exports.signup = async (req, res) => {
     }
   }
 
+
   try {
+    // Mevcut kullanıcıyı kontrol et
+    const existingUser = await db.User.findOne({
+      where: {
+        tcKimlik,
+        isDeleted: false, // Yalnızca aktif kullanıcıları kontrol et
+      },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'Bu TC Kimlik Numarası ile aktif bir kullanıcı zaten mevcut.' });
+    }
+
     // Kullanıcıyı oluştur
     const user = await db.User.create({
       name,
       surname,
       tcKimlik,
       age,
-      phoneNumber, 
+      phoneNumber,
       password,
       bloodGroup,
-      profilePic
+      profilePic,
     });
 
     // Acil durum kontaklarını ekle
-    const contacts = emergencyContacts.map(contact => ({
+    const contacts = emergencyContacts.map((contact) => ({
       contactNumber: contact.contactNumber,
       contactInfo: contact.contactInfo,
-      userId: user.id
+      userId: user.id,
     }));
     await db.Contact.bulkCreate(contacts);
 
     res.status(201).json({ message: 'Kullanıcı başarıyla oluşturuldu.' });
   } catch (err) {
     console.error(err);
-    if (err.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({ message: 'TC Kimlik Numarası zaten mevcut.' });
-    }
     res.status(500).json({ message: 'Sunucu Hatası' });
   }
 };
-
 exports.login = async (req, res) => {
-  const { tcKimlik, password } = req.body;
+  const { tcKimlik, password, deviceToken } = req.body;
 
   try {
-    const user = await db.User.findOne({ where: { tcKimlik } });
+    const user = await db.User.findOne({ where: { tcKimlik, isDeleted: false } });
 
     if (!user) return res.status(400).json({ message: 'Geçersiz TC Kimlik Numarası veya şifre.' });
 
     const isMatch = await user.validPassword(password);
     if (!isMatch) return res.status(400).json({ message: 'Geçersiz TC Kimlik Numarası veya şifre.' });
+
+    // Update deviceToken if provided
+    if (deviceToken) {
+      user.deviceToken = deviceToken;
+      await user.save();
+    }
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
