@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }, {
       tableName: 'AlertResponses',
+      timestamps: false
       // Sequelize'ın paranoid özelliğini devre dışı bırakın
       // paranoid: true,
       // deletedAt: 'deletedAt'

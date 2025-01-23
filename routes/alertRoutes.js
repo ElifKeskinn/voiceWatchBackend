@@ -1,5 +1,3 @@
-// routes/alertRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const alertController = require('../controllers/alertController');
@@ -22,7 +20,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Acil durum bildirimi alındı ve bildirim gönderiliyor.
+ *         description: Acil durum bildirimi gönderildi.
  *         content:
  *           application/json:
  *             schema:
@@ -30,13 +28,13 @@ const authMiddleware = require('../middlewares/authMiddleware');
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Acil durum bildirimi alındı. Bildirim gönderiliyor."
+ *                   example: "Acil durum bildirimi gönderildi."
  *       401:
  *         description: Yetkisiz erişim
  *       500:
  *         description: Sunucu Hatası
  */
-router.post('/manual', authMiddleware, alertController.manualAlert);
+router.post('/manual', authMiddleware, alertController.sendManualAlert);
 
 /**
  * @swagger
@@ -104,6 +102,7 @@ router.post('/respond', authMiddleware, alertController.respondAlert);
  *                 description: Yapay zeka modelinden gelen veri
  *             example:
  *               data:
+ *                 key: "value"
  *     responses:
  *       200:
  *         description: Yapay zeka entegrasyonu başarılı.

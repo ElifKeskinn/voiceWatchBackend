@@ -1,4 +1,3 @@
-// services/alertService.js
 
 const { sendPushNotification } = require('./fcmService');
 const { sendSMS } = require('./smsService');
@@ -18,6 +17,7 @@ const sendManualAlert = async (user) => {
     await sendPushNotification(user.deviceToken, pushMessage);
   } else {
     console.warn('Kullanıcının deviceToken bilgisi bulunmuyor.');
+    throw new Error('Device token bulunamadı.');
   }
 
   // Alert kaydı oluştur
@@ -32,7 +32,7 @@ const sendManualAlert = async (user) => {
       const refreshedAlert = await db.Alert.findByPk(alert.id);
       if (!refreshedAlert.isResponded) {
         // Yanıt alınamadıysa, acil durum kontaklarına SMS gönder
-        const contacts = await db.Contact.findAll({ where: { userId: user.id } });
+        const contacts = await db.Contact.findAll({ where: { userId: user.id, isDeleted: false } });
         const contactNumbers = contacts.map(contact => contact.contactNumber);
 
         const smsMessage = `Kullanıcı ${user.name} ${user.surname} bir acil durum bildirimi gönderdi ve yanıt alamadık. Lütfen kontrol edin.`;
@@ -52,11 +52,13 @@ const sendManualAlert = async (user) => {
             console.error(`SMS gönderilirken hata oluştu: ${err.message}`);
           }
         }
-      }
-    } catch (err) {
-      console.error(`Acil durum bildirimi sürecinde hata oluştu: ${err.message}`);
-    }
-  }, 15000); // 15 saniye = 15000 milisaniye
+   // Alert'ı kapat
+   await refreshedAlert.update({ isResponded: true });
+  }
+} catch (err) {
+  console.error(`Acil durum bildirimi sürecinde hata oluştu: ${err.message}`);
+}
+}, 15000); // 15 saniye = 15000 milisaniye
 };
 
 module.exports = { sendManualAlert };

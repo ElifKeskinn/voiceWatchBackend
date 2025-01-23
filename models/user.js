@@ -85,6 +85,12 @@ module.exports = (sequelize, DataTypes) => {
   User.prototype.validPassword = async function(password) {
     return await bcrypt.compare(password, this.password);
   };
+  
+  User.associate = (models) => {
+    User.hasMany(models.Contact, { as: 'emergencyContacts', foreignKey: 'userId', onDelete: 'NO ACTION' });
+    User.hasMany(models.PasswordReset, { as: 'passwordResets', foreignKey: 'userId', onDelete: 'NO ACTION' });
+    User.hasMany(models.Alert, { as: 'alerts', foreignKey: 'userId', onDelete: 'NO ACTION' });
+  };
 
   return User;
 };

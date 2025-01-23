@@ -1,16 +1,30 @@
-const admin = require('firebase-admin');
+
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getMessaging } = require('firebase-admin/messaging');
+const fs = require('fs');
 require('dotenv').config();
 
 // Firebase servis hesabı anahtarını JSON dosyasından yükleyin
-const fs = require('fs');
-const serviceAccount = JSON.parse(fs.readFileSync(process.env.FCM_SERVICE_ACCOUNT_FILE, 'utf-8'));
+const serviceAccountPath = process.env.FCM_SERVICE_ACCOUNT_FILE;
+
+if (!serviceAccountPath) {
+  throw new Error('FCM_SERVICE_ACCOUNT_FILE env değişkeni tanımlı değil.');
+}
+
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
+} catch (err) {
+  console.error('Firebase servis hesabı anahtarını yüklerken hata oluştu:', err);
+  throw err;
+}
 
 // Firebase Admin SDK'yı başlatın
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
+initializeApp({
+  credential: cert(serviceAccount)
+});
+
+const messaging = getMessaging();
 
 /**
  * Belirtilen cihaz token'ına push bildirimi gönderir.
@@ -26,7 +40,12 @@ const sendPushNotification = (deviceToken, message) => {
     }
   };
 
-  return admin.messaging().sendToDevice(deviceToken, payload);
+  const messagePayload = {
+    token: deviceToken,
+    notification: payload.notification
+  };
+
+  return messaging.send(messagePayload);
 };
 
 module.exports = { sendPushNotification };

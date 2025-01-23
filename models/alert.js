@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false, 
       },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
       isResponded: { // Kullanıcının yanıt verip vermediği
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -22,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }, {
       tableName: 'Alerts',
+      timestamps: false 
       // Sequelize'ın paranoid özelliğini devre dışı bırakın
       // paranoid: true,
       // deletedAt: 'deletedAt'
