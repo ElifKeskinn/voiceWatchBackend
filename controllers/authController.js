@@ -2,6 +2,7 @@ const db = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
+const { ValidationError, UniqueConstraintError } = require('sequelize');
 
 exports.signup = async (req, res) => {
   const { name, surname, tcKimlik, age, phoneNumber, password, bloodGroup, emergencyContacts, profilePic } = req.body;
@@ -17,7 +18,11 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Acil durum kontaklarının hem numarası hem de bilgisi olmalı.' });
     }
   }
-
+  // TC Kimlik Numarasının doğru formatta olup olmadığını kontrol et
+  const tcRegex = /^\d{11}$/;
+  if (!tcRegex.test(tcKimlik)) {
+    return res.status(400).json({ message: 'TC Kimlik Numarası tam olarak 11 haneli olmalıdır.' });
+  }
 
   try {
     // Mevcut kullanıcıyı kontrol et
@@ -55,9 +60,14 @@ exports.signup = async (req, res) => {
     res.status(201).json({ message: 'Kullanıcı başarıyla oluşturuldu.' });
   } catch (err) {
     console.error(err);
+    if (err instanceof ValidationError || err instanceof UniqueConstraintError) {
+      const messages = err.errors.map((error) => error.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
     res.status(500).json({ message: 'Sunucu Hatası' });
   }
 };
+
 exports.login = async (req, res) => {
   const { tcKimlik, password, deviceToken } = req.body;
 

@@ -17,7 +17,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     tcKimlik: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        isNumeric: {
+          msg: 'TC Kimlik Numarası sadece rakamlardan oluşmalıdır.'
+        },
+        len: {
+          args: [11, 11],
+          msg: 'TC Kimlik Numarası tam olarak 11 haneli olmalıdır.'
+        }
+      }
+    
     },
     age: {
       type: DataTypes.INTEGER,

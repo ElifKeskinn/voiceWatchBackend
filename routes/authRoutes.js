@@ -36,7 +36,7 @@ const authController = require('../controllers/authController');
  *               surname:
  *                 type: string
  *               tcKimlik:
- *                 type: string
+ *                 type: Number
  *               age:
  *                 type: integer
  *               phoneNumber:
