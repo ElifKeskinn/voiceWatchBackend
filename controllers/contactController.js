@@ -18,6 +18,19 @@ exports.addContact = async (req, res) => {
   }
 
   try {
+    // Aynı kontak numarasının varlığını kontrol et
+    const existingContact = await db.Contact.findOne({
+      where: {
+        userId: req.user.id,
+        contactNumber: contactNumber,
+        isDeleted: false
+      }
+    });
+
+    if (existingContact) {
+      return res.status(400).json({ message: 'Bu kontak numarası zaten mevcut.' });
+    }
+
     const contact = await db.Contact.create({
       contactNumber,
       contactInfo,
@@ -36,9 +49,23 @@ exports.updateContact = async (req, res) => {
   const { contactNumber, contactInfo } = req.body;
 
   try {
-    const contact = await db.Contact.findOne({ where: { id, userId: req.user.id } });
+    const contact = await db.Contact.findOne({ where: { id, userId: req.user.id , isDeleted: false } });
     if (!contact) return res.status(404).json({ message: 'Kontakt bulunamadı.' });
 
+     // Eğer contactNumber güncelleniyorsa, aynı numaranın başka bir kontakta olup olmadığını kontrol et
+     if (contactNumber && contactNumber !== contact.contactNumber) {
+      const duplicateContact = await db.Contact.findOne({
+        where: {
+          userId: req.user.id,
+          contactNumber: contactNumber,
+          isDeleted: false
+        }
+      });
+
+      if (duplicateContact) {
+        return res.status(400).json({ message: 'Bu kontak numarası zaten mevcut.' });
+      }
+    }
     contact.contactNumber = contactNumber || contact.contactNumber;
     contact.contactInfo = contactInfo || contact.contactInfo;
     await contact.save();
