@@ -1,27 +1,22 @@
 
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getMessaging } = require('firebase-admin/messaging');
-const fs = require('fs');
 require('dotenv').config();
 
-// Firebase servis hesabı anahtarını JSON dosyasından yükleyin
-const serviceAccountPath = process.env.FCM_SERVICE_ACCOUNT_FILE;
 
-if (!serviceAccountPath) {
-  throw new Error('FCM_SERVICE_ACCOUNT_FILE env değişkeni tanımlı değil.');
-}
-
+// Firebase servis hesabı JSON stringini Base64 çözün ve parse edin
 let serviceAccount;
 try {
-  serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
+    const decodedJson = Buffer.from(process.env.FCM_SERVICE_ACCOUNT_FILE, 'base64').toString('utf-8');
+    serviceAccount = JSON.parse(decodedJson);
 } catch (err) {
-  console.error('Firebase servis hesabı anahtarını yüklerken hata oluştu:', err);
-  throw err;
+    console.error('Firebase servis hesabı JSON parse edilirken hata oluştu:', err);
+    throw err;
 }
 
 // Firebase Admin SDK'yı başlatın
 initializeApp({
-  credential: cert(serviceAccount)
+    credential: cert(serviceAccount)
 });
 
 const messaging = getMessaging();
