@@ -1,17 +1,32 @@
 const { Sequelize } = require('sequelize');
-const config = require('../config/config').development;
+const config = require('../config/config')[process.env.NODE_ENV || 'development'];
 
-const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  {
-    host: config.host,
+let sequelize;
+
+if (process.env.NODE_ENV === 'production') {
+  if (!config.url) {
+    throw new Error('DATABASE_URL is not defined in the production environment');
+  }
+  console.log('Connecting to production database with URL:', config.url);
+  sequelize = new Sequelize(config.url, {
     dialect: config.dialect,
     dialectOptions: config.dialectOptions,
     logging: config.logging,
-  }
-);
+  });
+} else {
+  console.log('Connecting to development database:', config.database);
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    {
+      host: config.host,
+      dialect: config.dialect,
+      port: config.port,
+      logging: config.logging,
+    }
+  );
+}
 
 const db = {};
 
