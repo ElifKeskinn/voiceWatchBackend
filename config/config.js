@@ -6,32 +6,19 @@ module.exports = {
     password: process.env.DB_PASSWORD || 'pass',
     database: process.env.DB_NAME || 'voicewatch',
     host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432, //standart port
+    port: process.env.DB_PORT || 5432,
     dialect: process.env.DB_DIALECT || 'postgres',
-          // PostgreSQL için gerekli ek ayarlar varsa buraya ekleyin
-    // Örneğin, SSL gerekiyorsa:
-    // dialectOptions: {
-    //   ssl: {
-    //     require: true,
-    //     rejectUnauthorized: false, // Sertifika doğrulaması için
-    //   },
-    // },
-   
-    logging: console.log, // SQL sorgularını görmek için
+    logging: console.log,
   },
   production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: process.env.DB_DIALECT || 'postgres',
+    url: process.env.DATABASE_URL, 
+    dialect: 'postgres',
     dialectOptions: {
       ssl: {
-        require: true, // Railway genellikle SSL 
-        rejectUnauthorized: false, // Sertifika doğrulaması için
+        require: true,
+        rejectUnauthorized: false,
       },
     },
-    logging: false, 
+    logging: false,
   },
 };
