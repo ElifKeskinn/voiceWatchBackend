@@ -1,6 +1,6 @@
 # VoiceWatch Backend API
 
-VoiceWatch is a backend API designed to help users manage their emergency contacts efficiently. Built with Node.js, Express, and Sequelize, it leverages Microsoft SQL Server for robust data management. This API facilitates user registration, authentication, and the management of emergency contacts, ensuring that users have quick access to their important connections during critical moments.
+VoiceWatch is a backend API designed to help users manage their emergency contacts efficiently. Built with Node.js, Express, and Sequelize, it leverages PostgreSQL for robust data management. This API facilitates user registration, authentication, and the management of emergency contacts, ensuring that users have quick access to their important connections during critical moments.
 
 ## 📄 Table of Contents
 
