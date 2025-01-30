@@ -8,8 +8,15 @@ module.exports = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432, //standart port
     dialect: process.env.DB_DIALECT || 'postgres',
-    dialectOptions: {
-    },
+          // PostgreSQL için gerekli ek ayarlar varsa buraya ekleyin
+    // Örneğin, SSL gerekiyorsa:
+    // dialectOptions: {
+    //   ssl: {
+    //     require: true,
+    //     rejectUnauthorized: false, // Sertifika doğrulaması için
+    //   },
+    // },
+   
     logging: console.log, // SQL sorgularını görmek için
   },
   production: {

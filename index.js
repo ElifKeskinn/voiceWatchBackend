@@ -1,4 +1,3 @@
-// index.js
 const express = require('express');
 const dotenv = require('dotenv');
 const db = require('./models'); // Sequelize modelleri
@@ -57,7 +56,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/alert', alertRoutes);
 
-// Test endpointi http://localhost:5000/ ile test edilebilir swagger ekranı için http://localhost:5000/api-docs/
+// // test endpointi http://localhost:5000/ ile test edilebilir swagger ekranı için http://localhost:5000/api-docs/
 app.get('/', (req, res) => {
   res.send('VoiceWatch Backend API is running.');
 });
@@ -82,5 +81,3 @@ db.sequelize.authenticate()
   .catch(err => {
     console.error('Unable to connect to the database:', err);
   });
-
-module.exports = app;
