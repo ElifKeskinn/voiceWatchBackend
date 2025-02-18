@@ -9,10 +9,11 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
 dotenv.config();
-
+const cors = require('cors'); // CORS paketi kuruldu
 const app = express();
 
 // Middleware
+app.use(cors());//bu kısım sonradan frontend yayına alındığında değiştirilecek
 app.use(express.json());
 
 // Swagger Ayarları
