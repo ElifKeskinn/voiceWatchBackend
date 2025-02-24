@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const http = require('http');
 const db = require('./models'); // Sequelize modelleri
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -7,6 +8,8 @@ const contactRoutes = require('./routes/contactRoutes');
 const alertRoutes = require('./routes/alertRoutes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const { loadModel } = require('./services/aiService');
+const { setupWebSocket } = require('./websocket');
 
 dotenv.config();
 const cors = require('cors'); // CORS paketi kuruldu
@@ -71,15 +74,30 @@ app.use((err, req, res, next) => {
 });
 
 // Veritabanı bağlantısını test et ve senkronize et
+// 1) HTTP sunucu oluştur
+const server = http.createServer(app);
+
+// 2) WebSocket setup
+setupWebSocket(server);
+
+// 3) Ardından DB sync + TF model load
 db.sequelize.authenticate()
   .then(() => {
     console.log('Database connected...');
-    return db.sequelize.sync(); // { force: true } opsiyonel, veritabanını yeniden oluşturur
+    return db.sequelize.sync();
   })
   .then(() => {
     console.log('Database synchronized...');
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+
+    // Model yükle
+    loadModel().then(() => {
+      server.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }).catch(err => {
+      console.error('Model yüklemesi başarısız oldu:', err);
+    });
   })
   .catch(err => {
     console.error('Unable to connect to the database:', err);
