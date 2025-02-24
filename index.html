@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>WebSocket Test</title>
+</head>
+<body>
+  <h1>WebSocket Test</h1>
+  <p>Sunucuya bağlanmak ve mesaj göndermek için aşağıdaki butonları kullanın.</p>
+
+  <button id="connectBtn">Connect</button>
+  <button id="sendBtn">Send Message</button>
+  <input type="text" id="inputMsg" placeholder="Mesajınız" />
+  <hr />
+  <div id="log"></div>
+
+  <script>
+    let ws;
+    const connectBtn = document.getElementById('connectBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const inputMsg = document.getElementById('inputMsg');
+    const logDiv = document.getElementById('log');
+
+    function addLog(message) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      logDiv.appendChild(p);
+    }
+
+    connectBtn.onclick = () => {
+      // WebSocket bağlantısı: localhost:5000 (port 5000)
+      ws = new WebSocket('ws://localhost:5000');
+
+      ws.onopen = () => {
+        addLog(' WebSocket connected!');
+      };
+      ws.onmessage = (event) => {
+        addLog('Sunucudan mesaj: ' + event.data);
+      };
+      ws.onerror = (err) => {
+        addLog(' WebSocket error: ' + err);
+      };
+      ws.onclose = () => {
+        addLog(' WebSocket closed.');
+      };
+    };
+
+    sendBtn.onclick = () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        const messageToSend = inputMsg.value || 'Hello from client!';
+        ws.send(messageToSend);
+        addLog(' Gönderilen mesaj: ' + messageToSend);
+      } else {
+        addLog(' WebSocket henüz açık değil.');
+      }
+    };
+  </script>
+</body>
+</html>
