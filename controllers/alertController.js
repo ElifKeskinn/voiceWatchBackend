@@ -1,6 +1,6 @@
 const db = require('../models');
 const { sendManualAlert } = require('../services/alertService');
-
+const { predictFromMFCC } = require('../services/aiService');
 /**
  * Manuel Acil Durum Bildirimi Gönderir
  * Route: POST /api/alert/manual
@@ -69,17 +69,17 @@ exports.respondAlert = async (req, res) => {
  * Gelecekte yapay zeka modelinden alınan sonuçlara göre acil durum bildirimi işlemleri yapılabilir.
  */
 exports.aiIntegration = async (req, res) => {
-  const { data } = req.body; // Yapay zeka modelinden gelen veri
+    const { data } = req.body; // MFCC özellik vektörü
 
-  try {
-    // Yapay zeka modelinin işleyebileceği veri işleme
-    // Örneğin, belirli bir duruma göre manuel acil durum bildirimi tetiklemek
+    if (!data) {
+        return res.status(400).json({ message: 'MFCC verisi gereklidir.' });
+    }
 
-    // Bu kısım yapay zeka modeline bağlı olarak doldurulacaktır.
-
-    res.json({ message: 'Yapay zeka entegrasyonu başarılı.' });
-  } catch (err) {
-    console.error('AI integration error:', err);
-    res.status(500).json({ message: 'Yapay zeka entegrasyonu sırasında hata oluştu.' });
-  }
+    try {
+        const result = await predictFromMFCC(data);
+        res.json({ message: 'Yapay zeka entegrasyonu başarılı.', prediction: result });
+    } catch (err) {
+        console.error('❌ AI integration error:', err);
+        res.status(500).json({ message: err.message || 'Yapay zeka entegrasyonu sırasında hata oluştu.' });
+    }
 };
