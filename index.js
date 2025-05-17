@@ -17,7 +17,7 @@ const app = express();
 
 // Middleware
 app.use(cors());//bu kısım sonradan frontend yayına alındığında değiştirilecek
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); 
 
 // Swagger Ayarları
 const options = {
@@ -82,23 +82,13 @@ setupWebSocket(server);
 
 // 3) Ardından DB sync + TF model load
 db.sequelize.authenticate()
-  .then(() => {
-    console.log('Database connected...');
-    return db.sequelize.sync();
-  })
-  .then(() => {
-    console.log('Database synchronized...');
-    const PORT = process.env.PORT || 3000;
-
-    // Model yükle
-    loadModel().then(() => {
-      server.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on port ${PORT}`);
-      });
-    }).catch(err => {
-      console.error('Model yüklemesi başarısız oldu:', err);
-    });
+  .then(() => db.sequelize.sync())
+  .then(async () => {
+    console.log('✅ Database hazır.');
+    await loadModel();  // SavedModel’i burada önceden yükleyelim
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, () => console.log(`🚀 Server ${PORT} portunda`));
   })
   .catch(err => {
-    console.error('Unable to connect to the database:', err);
+    console.error('❌ Başlangıç hatası:', err);
   });
