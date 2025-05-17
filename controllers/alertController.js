@@ -1,6 +1,6 @@
 const db = require('../models');
 const { sendManualAlert } = require('../services/alertService');
-const { predictFromMFCC } = require('../services/aiService');
+const { predictFromSpectrogram  } = require('../services/aiService');
 /**
  * Manuel Acil Durum Bildirimi Gönderir
  * Route: POST /api/alert/manual
@@ -68,18 +68,21 @@ exports.respondAlert = async (req, res) => {
  * Bu endpoint, yapay zeka modeli eğitildiğinde entegre edilecek şekilde hazırlanmıştır.
  * Gelecekte yapay zeka modelinden alınan sonuçlara göre acil durum bildirimi işlemleri yapılabilir.
  */
+const CATEGORIES = ['glass_breaking', 'fall', 'silence', 'scream'];
+
 exports.aiIntegration = async (req, res) => {
-    const { data } = req.body; // MFCC özellik vektörü
+  const { data } = req.body;  // 2B Mel-spektral veri
+  if (!data) {
+    return res.status(400).json({ message: 'Mel-spektral veri gerekli.' });
+  }
 
-    if (!data) {
-        return res.status(400).json({ message: 'MFCC verisi gereklidir.' });
-    }
-
-    try {
-        const result = await predictFromMFCC(data);
-        res.json({ message: 'Yapay zeka entegrasyonu başarılı.', prediction: result });
-    } catch (err) {
-        console.error('❌ AI integration error:', err);
-        res.status(500).json({ message: err.message || 'Yapay zeka entegrasyonu sırasında hata oluştu.' });
-    }
+  try {
+    const prediction = await predictFromSpectrogram(data);
+    const maxIdx = prediction.indexOf(Math.max(...prediction));
+    const result = CATEGORIES[maxIdx];
+    res.json({ message: 'Yapay zeka entegrasyonu başarılı.', prediction , result });
+  } catch (err) {
+    console.error(' AI integration error:', err);
+    res.status(500).json({ message: err.message || 'Yapay zeka entegrasyonu sırasında hata oluştu.' });
+  }
 };

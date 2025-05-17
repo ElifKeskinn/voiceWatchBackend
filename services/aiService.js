@@ -1,47 +1,56 @@
+// services/aiService.js
 const tf = require('@tensorflow/tfjs-node');
+const path = require('path');
 
-let model;
-let modelLoadingPromise = null;
+let modelPromise = null;
 
-// Modeli asenkron olarak yükleyen fonksiyon.
-// Eğer model zaten yükleniyorsa, yükleme promise'ını döndürür.
-const loadModel = async () => {
-    if (modelLoadingPromise) {
-        return modelLoadingPromise;
-    }
-    modelLoadingPromise = (async () => {
-        try {
-            model = await tf.loadLayersModel('file://tfjs_model/model.json');
-            console.log('✅ Yapay zeka modeli başarıyla yüklendi.');
-            return model;
-        } catch (error) {
-            console.error('❌ Model yüklenirken hata oluştu:', error);
-            throw error;
-        }
-    })();
-    return modelLoadingPromise;
-};
+/**
+ * GraphModel formatındaki modeli yükler (bir kere).
+ */
+function loadModel() {
+  if (modelPromise) return modelPromise;
+  const modelPath = 'file://' + path.resolve(__dirname, '../tfjs_model/model.json');
+  modelPromise = tf.loadGraphModel(modelPath)
+    .then(m => {
+      console.log('✅ TF.js GraphModel yüklendi:', modelPath);
+      return m;
+    })
+    .catch(err => {
+      console.error('❌ GraphModel yüklerken hata:', err);
+      throw err;
+    });
+  return modelPromise;
+}
 
-// MFCC özellik vektöründen tahmin yapma fonksiyonu.
-// "data" parametresi [40] boyutlu bir dizi (örneğin, MFCC özellik vektörü) olmalıdır.
-const predictFromMFCC = async (data) => {
-    // Model yüklü değilse, yüklenmesini bekle.
-    if (!model) {
-        await loadModel();
-    }
-    if (!Array.isArray(data) || data.length !== 40) {
-        throw new Error('Geçersiz MFCC veri formatı. 40 uzunluğunda bir dizi bekleniyor.');
-    }
-    try {
-        // Gelen veriyi tensor'a çevirip uygun şekle getiriyoruz.
-        const inputTensor = tf.tensor(data).reshape([1, 40, 1]);
-        const prediction = model.predict(inputTensor);
-        const result = await prediction.data(); // Asenkron veri çekme
-        return Array.from(result);
-    } catch (err) {
-        console.error('❌ Yapay zeka tahmin hatası:', err);
-        throw new Error('Tahmin işlemi sırasında hata oluştu.');
-    }
-};
+/**
+ * Mel-spektral veriden tahmin alır.
+ * @param {number[][]} spectrogram - [128][timeSteps] boyutlu dizi
+ * @returns {Promise<number[]>} - Sınıf olasılıkları
+ */
+async function predictFromSpectrogram(spectrogram) {
+  const model = await loadModel();
 
-module.exports = { loadModel, predictFromMFCC };
+  // Girdi doğrulaması
+  if (
+    !Array.isArray(spectrogram) ||
+    !Array.isArray(spectrogram[0]) ||
+    spectrogram.length !== 128
+  ) {
+    throw new Error('Geçersiz veri: [128][timeSteps] boyutunda Mel-spektral veri bekleniyor.');
+  }
+
+  const timeSteps = spectrogram[0].length;
+
+  // 1) İki boyutlu tensor oluştur: [128, timeSteps]
+  const tensor2d = tf.tensor(spectrogram, [128, timeSteps], 'float32');
+  // 2) Batch boyutunu ekle: [1, 128, timeSteps]
+  const inputTensor = tensor2d.expandDims(0);
+
+  // 3) GraphModel için executeAsync
+  const outputTensor = await model.executeAsync(inputTensor);
+  const probs = await outputTensor.data();
+
+  return Array.from(probs);
+}
+
+module.exports = { loadModel, predictFromSpectrogram };
