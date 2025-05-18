@@ -1,7 +1,7 @@
-// websocket.js
 const WebSocket = require('ws');
-const path      = require('path');
 const tfService = require('./services/aiService');
+const { decodeBase64ToFloatArray } = require('./services/audioDecodeService');
+const { generateMelSpectrogram } = require('./services/melService');
 const CATEGORIES = ['glass_breaking', 'fall', 'silence', 'scream'];
 
 function setupWebSocket(server) {
@@ -15,7 +15,6 @@ function setupWebSocket(server) {
 
   wss.on('connection', async (ws) => {
     console.log('🟢 WS client connected');
-    // Modeli önceden yükle
     await tfService.loadModel();
 
     ws.on('message', async (raw) => {
@@ -23,18 +22,24 @@ function setupWebSocket(server) {
       try {
         msg = JSON.parse(raw);
       } catch (e) {
-        return ws.send(JSON.stringify({ action:'aiError', message:'Invalid JSON' }));
+        return ws.send(JSON.stringify({ action: 'aiError', message: 'Invalid JSON' }));
       }
 
-      if (msg.action === 'aiIntegration' && Array.isArray(msg.data)) {
+      if (msg.action === 'aiIntegration' && typeof msg.data === 'string') {
         try {
-          const probs  = await tfService.predictFromSpectrogram(msg.data);
-          const idx    = probs.indexOf(Math.max(...probs));
-          const result = CATEGORIES[idx];
+          const floatAudio = await decodeBase64ToFloatArray(msg.data);
+          const mel = await generateMelSpectrogram(floatAudio);
+          const probs = await tfService.predictFromSpectrogram(mel);
+
+          const maxVal = Math.max(...probs);
+          const idx = probs.indexOf(maxVal);
+
+          const result = maxVal < 0.5 ? 'safe' : CATEGORIES[idx];
 
           ws.send(JSON.stringify({
             action: 'aiResult',
-            result
+            result,
+            prediction: probs // dilersen frontend de görebilir
           }));
         } catch (err) {
           console.error('❌ AI WS error:', err);
@@ -44,7 +49,6 @@ function setupWebSocket(server) {
           }));
         }
       }
-      
     });
 
     ws.on('close', () => {
