@@ -82,7 +82,7 @@ exports.aiIntegration = async (req, res) => {
     const maxIdx = prediction.indexOf(maxVal);
 
     // 🔒 0.5 eşiği kontrolü
-    const result = maxVal < 0.5 ? 'safe' : CATEGORIES[maxIdx];
+    const result = maxVal < 0.7 ? 'safe' : CATEGORIES[maxIdx];
 
     res.json({
       message: 'Yapay zeka entegrasyonu başarılı.',
