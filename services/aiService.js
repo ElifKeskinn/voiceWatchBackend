@@ -47,7 +47,7 @@ async function predictFromSpectrogram(spectrogram) {
   const inputTensor = tensor2d.expandDims(0);
 
   // 3) GraphModel için executeAsync
-  const outputTensor = await model.executeAsync(inputTensor);
+  const outputTensor = await model.execute(inputTensor);
   const probs = await outputTensor.data();
 
   return Array.from(probs);

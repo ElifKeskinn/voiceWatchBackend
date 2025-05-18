@@ -78,11 +78,19 @@ exports.aiIntegration = async (req, res) => {
 
   try {
     const prediction = await predictFromSpectrogram(data);
-    const maxIdx = prediction.indexOf(Math.max(...prediction));
-    const result = CATEGORIES[maxIdx];
-    res.json({ message: 'Yapay zeka entegrasyonu başarılı.', prediction , result });
+    const maxVal = Math.max(...prediction);
+    const maxIdx = prediction.indexOf(maxVal);
+
+    // 🔒 0.5 eşiği kontrolü
+    const result = maxVal < 0.5 ? 'safe' : CATEGORIES[maxIdx];
+
+    res.json({
+      message: 'Yapay zeka entegrasyonu başarılı.',
+      prediction,
+      result
+    });
   } catch (err) {
-    console.error(' AI integration error:', err);
+    console.error('AI integration error:', err);
     res.status(500).json({ message: err.message || 'Yapay zeka entegrasyonu sırasında hata oluştu.' });
   }
 };
