@@ -123,4 +123,38 @@ router.post('/respond', authMiddleware, alertController.respondAlert);
  */
 router.post('/ai-integration', authMiddleware, alertController.aiIntegration);
 
+
+/**
+ * @swagger
+ * /api/alert/send-sms:
+ *   post:
+ *     summary: Belirtilen numaralara toplu SMS gönderir
+ *     tags: [Alerts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [numbers, message]
+ *             properties:
+ *               numbers:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Telefon numaraları (0XXX veya 9XXXXXXXX formatında)
+ *               message:
+ *                 type: string
+ *                 description: Gönderilecek SMS içeriği
+ *             example:
+ *               numbers: ["05345701578","905312345678"]
+ *               message: "Bu bir test SMS’idir."
+ *     responses:
+ *       200:
+ *         description: SMS gönderim sonuçları
+ */
+router.post('/send-sms', authMiddleware, alertController.sendCustomSMS);
+
 module.exports = router;
