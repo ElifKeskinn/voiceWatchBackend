@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const upload = require('../middlewares/upload');
 
 /**
  * @swagger
@@ -93,34 +94,29 @@ router.get('/me', authMiddleware, userController.getMe);
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Kullanıcının adı
- *               surname:
- *                 type: string
- *                 description: Kullanıcının soyadı
- *               age:
- *                 type: integer
- *                 description: Kullanıcının yaşı
- *               bloodGroup:
- *                 type: string
- *                 description: Kan grubu
- *               profilePic:
- *                 type: string
- *                 description: Profil resmi URL'si
- *             example:
- *               name: "Elif"
- *               surname: "Keskin"
- *               age: 26
- *               bloodGroup: "A+"
- *               profilePic: "http://example.com/new-profile.jpg"
+ *      requestBody:
+*       required: true
+*       content:
+*         multipart/form-data:
+*           schema:
+*             type: object
+*             properties:
+*               name:
+*                 type: string
+*               surname:
+*                 type: string
+*               age:
+*                 type: integer
+*               bloodGroup:
+*                 type: string
+*               profilePic:
+*                 type: string
+*                 format: binary
+*             example:
+*               name: "Elif"
+*               surname: "Keskin"
+*               age: 26
+*               bloodGroup: "A+"
  *     responses:
  *       200:
  *         description: Profil başarıyla güncellendi
@@ -139,7 +135,7 @@ router.get('/me', authMiddleware, userController.getMe);
  *       500:
  *         description: Sunucu Hatası
  */
-router.patch('/me', authMiddleware, userController.updateProfile);
+router.patch('/me', authMiddleware, upload.single('profilePic'), userController.updateProfile);
 
 /**
  * @swagger
