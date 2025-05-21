@@ -1,26 +1,49 @@
 const fs = require('fs');
 const path = require('path');
-const { decode } = require('wav-decoder');
+const os = require('os');
+const { v4: uuidv4 } = require('uuid');
+const wavDecoder = require('wav-decoder');
+const ffmpegStatic = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+
+// fluent-ffmpeg'e statik ffmpeg yolunu tanıt
+ffmpeg.setFfmpegPath(ffmpegStatic);
 
 async function decodeBase64ToFloatArray(base64Str) {
-  const wavBuffer = Buffer.from(base64Str, 'base64');
+  // 1) Base64 → gelen ham dosya
+  const tmpBase = path.join(os.tmpdir(), uuidv4());
+  fs.writeFileSync(tmpBase, Buffer.from(base64Str, 'base64'));
 
-  const tempPath = path.join(__dirname, '../temp.wav');
-  fs.writeFileSync(tempPath, wavBuffer);
+  // 2) FFmpeg ile PCM WAV'a dönüştür
+  const wavPath = tmpBase + '.wav';
+  await new Promise((resolve, reject) => {
+    ffmpeg(tmpBase)
+      .outputOptions([
+        '-ac 1',        // mono
+        '-ar 16000',    // 16kHz
+        '-f wav'        // WAV format
+      ])
+      .save(wavPath)
+      .on('end', resolve)
+      .on('error', reject);
+  });
 
-  const fileBuffer = fs.readFileSync(tempPath);
-  const audioData = await decode(fileBuffer);
+  // 3) WAV'ı oku ve decode et
+  const wavBuffer = fs.readFileSync(wavPath);
+  const audioData = await wavDecoder.decode(wavBuffer);
 
-  let floatArray;
-  if (audioData.channelData.length === 1) {
-    floatArray = audioData.channelData[0];
-  } else {
-    const left = audioData.channelData[0];
-    const right = audioData.channelData[1];
-    floatArray = left.map((v, i) => (v + right[i]) / 2);
-  }
+  // 4) Mono değilse ortala
+  const floatArray = (audioData.channelData.length === 1)
+    ? audioData.channelData[0]
+    : audioData.channelData[0].map((v, i) => (v + audioData.channelData[1][i]) / 2);
 
-  console.log("✅ (Dosyadan) Float örnek (ilk 10):", floatArray.slice(0, 10));
+  // 5) Cleanup
+  try {
+    fs.unlinkSync(tmpBase);
+    fs.unlinkSync(wavPath);
+  } catch {}
+
+  console.log('✅ Decode tamam, float[0..9]:', floatArray.slice(0, 10));
   return floatArray;
 }
 

@@ -1,6 +1,8 @@
 const db = require('../models');
 const { sendManualAlert } = require('../services/alertService');
-const { predictFromSpectrogram  } = require('../services/aiService');
+const { decodeBase64ToFloatArray } = require('../services/audioDecodeService');
+const { generateMelSpectrogram }    = require('../services/melService');
+const { predictFromSpectrogram }    = require('../services/aiService');
 const { sendSMS } = require('../services/smsService');
 const CATEGORIES = ['glass_breaking', 'fall', 'silence', 'scream'];
 
@@ -95,26 +97,40 @@ exports.sendCustomSMS = async (req, res) => {
  */
 
 exports.aiIntegration = async (req, res) => {
-  const { data } = req.body;  // 2B Mel-spektral veri
-  if (!data) {
-    return res.status(400).json({ message: 'Mel-spektral veri gerekli.' });
-  }
-
   try {
-    const prediction = await predictFromSpectrogram(data);
+    let mel;
+
+    // Eğer data bir base64 string ise → önce audio decode & mel çıkar
+    if (typeof req.body.data === 'string') {
+      const floatAudio = await decodeBase64ToFloatArray(req.body.data);
+      mel = await generateMelSpectrogram(floatAudio);
+
+    // Eğer data zaten bir mel matrisi ise → direk kullan
+    } else if (
+      Array.isArray(req.body.data) &&
+      Array.isArray(req.body.data[0])
+    ) {
+      mel = req.body.data;
+
+    } else {
+      return res.status(400).json({ message: 'Geçersiz data formatı.' });
+    }
+
+    // Model tahmini + safe eşiği
+    const prediction = await predictFromSpectrogram(mel);
     const maxVal = Math.max(...prediction);
-    const maxIdx = prediction.indexOf(maxVal);
+    const result = maxVal < 0.7
+      ? 'safe'
+      : CATEGORIES[prediction.indexOf(maxVal)];
 
-    // 🔒 0.5 eşiği kontrolü
-    const result = maxVal < 0.7 ? 'safe' : CATEGORIES[maxIdx];
-
-    res.json({
+    return res.json({
       message: 'Yapay zeka entegrasyonu başarılı.',
       prediction,
       result
     });
+
   } catch (err) {
     console.error('AI integration error:', err);
-    res.status(500).json({ message: err.message || 'Yapay zeka entegrasyonu sırasında hata oluştu.' });
+    return res.status(500).json({ message: err.message });
   }
 };
