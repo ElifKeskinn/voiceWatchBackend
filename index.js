@@ -10,6 +10,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const { loadModel } = require('./services/aiService');
 const { setupWebSocket } = require('./websocket');
+const path = require('path');
+
 
 dotenv.config();
 const cors = require('cors'); // CORS paketi kuruldu
@@ -18,6 +20,7 @@ const app = express();
 // Middleware
 app.use(cors());//bu kısım sonradan frontend yayına alındığında değiştirilecek
 app.use(express.json({ limit: '50mb' })); 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Swagger Ayarları
 const options = {

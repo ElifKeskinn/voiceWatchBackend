@@ -17,7 +17,15 @@ exports.getMe = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   const { name, surname, age, bloodGroup, profilePic } = req.body;
-
+  let profilePicUrl = req.user.profilePic;
+   // Eğer FormData ile dosya geldiyse:
+  if (req.file) {
+    // örn: https://your-domain.com/uploads/filename.jpg
+    profilePicUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+  } else if (req.body.profilePic) {
+    // JSON içinden doğrudan internet linki geldiyse:
+    profilePicUrl = req.body.profilePic;
+  }
   try {
     const user = req.user;
     await user.update({
@@ -25,7 +33,7 @@ exports.updateProfile = async (req, res) => {
       surname: surname || user.surname,
       age: age || user.age,
       bloodGroup: bloodGroup || user.bloodGroup,
-      profilePic: profilePic || user.profilePic
+      profilePic: profilePicUrl || user.profilePic
     });
 
     res.json({ message: 'Profil başarıyla güncellendi.' });
