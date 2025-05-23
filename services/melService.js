@@ -8,7 +8,8 @@ const path = require('path');
  */
 function generateMelSpectrogram(floatAudio) {
   return new Promise((resolve, reject) => {
-const python = spawn('python', [path.join(__dirname, '../mel_generator.py')]);
+    const PY = process.env.PYTHON_PATH || 'python3'; 
+const python = spawn(PY, [path.join(__dirname, '../mel_generator.py')]);
 
 
     let data = '';
