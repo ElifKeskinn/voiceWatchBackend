@@ -94,7 +94,7 @@ router.get('/me', authMiddleware, userController.getMe);
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *      requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
