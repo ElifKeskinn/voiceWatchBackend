@@ -1,29 +1,30 @@
 FROM node:18-buster-slim
 
-# 1) Python3, pip, ffmpeg, numpy & scipy paketlerini apt ile kur
+# 1) Python3, pip, derleyici araçları, ffmpeg ve libsndfile1-dev
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       python3 \
       python3-pip \
-      python3-numpy \
-      python3-scipy \
+      python3-dev \
+      build-essential \
+      libsndfile1-dev \
       ffmpeg \
-      libsndfile1 \
-      build-essential && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+      pkg-config && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# 2) Sadece Python’a özel eksik bağımlılıkları pip ile yükle
-#    (librosa ve pysoundfile için)
-RUN pip3 install --no-cache-dir librosa soundfile
+# 2) Python bağımlılıklarını yükle
+#    requirements.txt içinde: numpy, scipy, librosa, soundfile
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# 3) Node.js bağımlılıklarını yükle
+# 3) Node.js bağımlılıkları
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# 4) Uygulama kodunu kopyala
+# 4) Kalan kodu kopyala
 COPY . .
 
-# 5) Başlat
+# 5) Uygulamayı çalıştır
 CMD ["node", "index.js"]
