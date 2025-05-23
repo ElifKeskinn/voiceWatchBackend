@@ -19,8 +19,7 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir -r requirements.txt
 
 COPY package*.json ./
-RUN npm ci --only=production --unsafe-perm
-
+RUN npm install --production --unsafe-perm
 COPY . .
 
 CMD ["node", "index.js"]
