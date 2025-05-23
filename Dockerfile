@@ -1,6 +1,6 @@
 FROM node:18-buster-slim
 
-# 1) Python3, pip, derleyici araçları, ffmpeg ve libsndfile1-dev
+# 1) Python, pip, derleyici araçları, ffmpeg, soundfile ve BLAS/LAPACK kütüphaneleri
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       python3 \
@@ -9,22 +9,27 @@ RUN apt-get update && \
       build-essential \
       libsndfile1-dev \
       ffmpeg \
-      pkg-config && \
+      pkg-config \
+      libblas-dev \
+      liblapack-dev \
+      gfortran && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# 2) Python bağımlılıklarını yükle
-#    requirements.txt içinde: numpy, scipy, librosa, soundfile
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+# 2) Pip'i güncelle ve önce soundfile'ı yükle (libsndfile zaten apt ile var)
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir soundfile
 
-# 3) Node.js bağımlılıkları
+# 3) Sonra librosa'yı yükle (bu aşamada numba, scipy vs. bağımlılıkları da wheel olarak gelecek)
+RUN pip3 install --no-cache-dir librosa
+
+# 4) Node.js bağımlılıklarını yükle
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# 4) Kalan kodu kopyala
+# 5) Kalan kodu kopyala
 COPY . .
 
-# 5) Uygulamayı çalıştır
+# 6) Uygulamayı çalıştır
 CMD ["node", "index.js"]
