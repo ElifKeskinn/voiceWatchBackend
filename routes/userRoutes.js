@@ -5,11 +5,11 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/upload');
 
 /**
- * @swagger
- * tags:
- *   name: Users
- *   description: Kullanıcı profil yönetimi
- */
+* @swagger
+* tags:
+*   name: Users
+*   description: Kullanıcı profil yönetimi
+*/
 
 /**
  * @swagger
@@ -86,7 +86,7 @@ const upload = require('../middlewares/upload');
  */
 router.get('/me', authMiddleware, userController.getMe);
 
-/**
+  /**
  * @swagger
  * /api/user/me:
  *   patch:
@@ -95,28 +95,28 @@ router.get('/me', authMiddleware, userController.getMe);
  *     security:
  *       - bearerAuth: []
  *      requestBody:
-*       required: true
-*       content:
-*         multipart/form-data:
-*           schema:
-*             type: object
-*             properties:
-*               name:
-*                 type: string
-*               surname:
-*                 type: string
-*               age:
-*                 type: integer
-*               bloodGroup:
-*                 type: string
-*               profilePic:
-*                 type: string
-*                 format: binary
-*             example:
-*               name: "Elif"
-*               surname: "Keskin"
-*               age: 26
-*               bloodGroup: "A+"
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               surname:
+ *                 type: string
+ *               age:
+ *                 type: integer
+ *               bloodGroup:
+ *                 type: string
+ *               profilePic:
+ *                 type: string
+ *                 format: binary
+ *             example:
+ *               name: "Elif"
+ *               surname: "Keskin"
+ *               age: 26
+ *               bloodGroup: "A+"
  *     responses:
  *       200:
  *         description: Profil başarıyla güncellendi
