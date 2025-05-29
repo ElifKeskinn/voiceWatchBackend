@@ -12,7 +12,7 @@ const CATEGORIES = ['glass_breaking', 'fall', 'silence', 'scream'];
  */
 exports.sendManualAlert = async (req, res) => {
   try {
-    await alertLogic(req.user);
+    await sendManualAlert(req.user);
     res.json({ message: 'Acil durum bildirimi gönderildi.' });
   } catch (err) {
     console.error('Manual alert error:', err);
