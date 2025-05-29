@@ -119,9 +119,11 @@ exports.aiIntegration = async (req, res) => {
     // Model tahmini + safe eşiği
     const prediction = await predictFromSpectrogram(mel);
     const maxVal = Math.max(...prediction);
-    const result = maxVal < 0.7
+    const bestIdx    = prediction.indexOf(maxVal);
+    const bestCat    = CATEGORIES[bestIdx];
+    const result = (maxVal < 0.7 || bestCat === 'silence')
       ? 'safe'
-      : CATEGORIES[prediction.indexOf(maxVal)];
+      : bestCat;
 
     return res.json({
       message: 'Yapay zeka entegrasyonu başarılı.',
